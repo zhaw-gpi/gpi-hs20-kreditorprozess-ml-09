@@ -1,0 +1,1206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0irg7ww" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.3.0">
+  <bpmn:collaboration id="Collaboration_06vozgy">
+    <bpmn:participant id="SekretariatParticipant" name="Sekretariat" processRef="Process_0npywkb" />
+    <bpmn:participant id="ProzessportalParticipant" name="Prozessportal" processRef="Kreditorprozess" />
+    <bpmn:participant id="ERPParticipant" name="ERP" />
+    <bpmn:participant id="ERPParticipant1" name="ERP" />
+    <bpmn:participant id="KostenstellenleitungParticipant" name="Kostenstellenleitung" processRef="Process_161542n" />
+    <bpmn:participant id="KreditorenbuchhaltungParticipant" name="Kreditorenbuchhaltung" processRef="Process_0dpofpu" />
+    <bpmn:participant id="LieferantParticipant" name="Lieferant" />
+    <bpmn:messageFlow id="RechnungsdatenUndPDFMessageFlow" name="Rechnungsdaten und PDF" sourceRef="RechnungErfassenTask" targetRef="RechnungErfasstStartEvent" />
+    <bpmn:messageFlow id="ReferenzNummerMessageFlow" name="Referenz-&#10;nummer" sourceRef="DatenVonZugehorigerBestellungAuslesenTask" targetRef="ERPParticipant" />
+    <bpmn:messageFlow id="BestelldatenUndLieferantendatenMessageFlow" name="Bestelldaten und Lieferantendaten" sourceRef="ERPParticipant" targetRef="DatenVonZugehorigerBestellungAuslesenTask" />
+    <bpmn:messageFlow id="LieferantenbezeichnungUndRechnungsdatenMessageFlow" name="Lieferanten-bezeichnung und Rechnungsdaten" sourceRef="RechnungInERPZurBezahlungErfassenTask" targetRef="ERPParticipant1" />
+    <bpmn:messageFlow id="ErfolgsOderFehlermeldungMessageFlow" name="Erfolgs- oder Fehlermeldung" sourceRef="ERPParticipant1" targetRef="RechnungInERPZurBezahlungErfassenTask" />
+    <bpmn:messageFlow id="AufgabePerEMailMessageFlow" name="Aufgabe per E-Mail" sourceRef="RechnungMateriellPrufenTask" targetRef="ZuPrufendeRechnungErhaltenStartEvent" />
+    <bpmn:messageFlow id="PrufergebnisKommentarMessageFlow" name="Prüfergebnis &#38; Kommentar" sourceRef="PrufergebnisFesthaltenTask" targetRef="RechnungMateriellPrufenTask" />
+    <bpmn:messageFlow id="RechnungAlsPDFMessageFlow" name="Rechnung als PDF" sourceRef="RechnungMateriellPrufenTask" targetRef="RechnungOffnenTask" />
+    <bpmn:messageFlow id="AufgabePerEMailMessageFlow1" name="Aufgabe per E-Mail" sourceRef="RechnungFormellPrufenTask" targetRef="ZuPrufendeRechnungErhaltenStartEvent1" />
+    <bpmn:messageFlow id="RechnungAlsPDFMessageFlow1" name="Rechnung als PDF" sourceRef="RechnungFormellPrufenTask" targetRef="RechnungOffnenTask1" />
+    <bpmn:messageFlow id="PrufergebnisKommentarMessageFlow1" name="Prüfergebnis &#38; Kommentar" sourceRef="PrufergebnisFesthaltenTask1" targetRef="RechnungFormellPrufenTask" />
+    <bpmn:messageFlow id="MailMitAblehnungsgrundMessageFlow" name="Mail mit Ablehnungsgrund" sourceRef="Activity_1k5dzl4" targetRef="RechnungMateriellAbgelehntEvent" />
+    <bpmn:messageFlow id="MailMitFreigabebestatigungMessageFlow" name="Mail mit Freigabe-bestätigung" sourceRef="Activity_0qrzd9n" targetRef="RechnungZurZahlungFreigegebenEvent" />
+    <bpmn:messageFlow id="RechnungUndBegleitbriefMitBegrundungMessageFlow" name="Rechnung und Begleitbrief mit Begründung" sourceRef="RechnungRetournierenTask" targetRef="LieferantParticipant" />
+    <bpmn:messageFlow id="ZahlungMessageFlow" name="Zahlung" sourceRef="RechnungBezahlenSubProcess" targetRef="LieferantParticipant" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_0npywkb" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1vv26j2">
+      <bpmn:lane id="SonstigesLane" name="Sonstiges">
+        <bpmn:flowNodeRef>RechnungPhysischEingetroffenStartEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungNachPDFScannenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungDigitalEingetroffenStartEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungAusdruckenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_16slpzd</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PapierrechnungInOrdnerAblegenTask</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="ProzessportalLane" name="Prozessportal">
+        <bpmn:flowNodeRef>RechnungErfassenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungErfasstEndEvent</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="RechnungPhysischEingetroffenStartEvent" name="Rechnung physisch eingetroffen">
+      <bpmn:outgoing>Flow_1vvo25c</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1mz9hgt" />
+    </bpmn:startEvent>
+    <bpmn:task id="RechnungNachPDFScannenTask" name="Rechnung nach PDF scannen">
+      <bpmn:incoming>Flow_1vvo25c</bpmn:incoming>
+      <bpmn:outgoing>Flow_1a2wd44</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:startEvent id="RechnungDigitalEingetroffenStartEvent" name="Rechnung digital eingetroffen">
+      <bpmn:outgoing>Flow_01z6z8i</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1jc1mqo" />
+    </bpmn:startEvent>
+    <bpmn:task id="RechnungAusdruckenTask" name="Rechnung ausdrucken">
+      <bpmn:incoming>Flow_01z6z8i</bpmn:incoming>
+      <bpmn:outgoing>Flow_0o3xkun</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_16slpzd">
+      <bpmn:incoming>Flow_1a2wd44</bpmn:incoming>
+      <bpmn:incoming>Flow_0o3xkun</bpmn:incoming>
+      <bpmn:outgoing>Flow_17hr1ed</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="PapierrechnungInOrdnerAblegenTask" name="Papierrechnung in Ordner ablegen">
+      <bpmn:incoming>Flow_17hr1ed</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ec63zs</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="RechnungErfassenTask" name="Rechnung erfassen">
+      <bpmn:incoming>Flow_1ec63zs</bpmn:incoming>
+      <bpmn:outgoing>Flow_10upow0</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="RechnungErfasstEndEvent" name="Rechnung erfasst">
+      <bpmn:incoming>Flow_10upow0</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1vvo25c" sourceRef="RechnungPhysischEingetroffenStartEvent" targetRef="RechnungNachPDFScannenTask" />
+    <bpmn:sequenceFlow id="Flow_1a2wd44" sourceRef="RechnungNachPDFScannenTask" targetRef="Gateway_16slpzd" />
+    <bpmn:sequenceFlow id="Flow_01z6z8i" sourceRef="RechnungDigitalEingetroffenStartEvent" targetRef="RechnungAusdruckenTask" />
+    <bpmn:sequenceFlow id="Flow_17hr1ed" sourceRef="Gateway_16slpzd" targetRef="PapierrechnungInOrdnerAblegenTask" />
+    <bpmn:sequenceFlow id="Flow_0o3xkun" sourceRef="RechnungAusdruckenTask" targetRef="Gateway_16slpzd" />
+    <bpmn:sequenceFlow id="Flow_1ec63zs" sourceRef="PapierrechnungInOrdnerAblegenTask" targetRef="RechnungErfassenTask" />
+    <bpmn:sequenceFlow id="Flow_10upow0" sourceRef="RechnungErfassenTask" targetRef="RechnungErfasstEndEvent" />
+  </bpmn:process>
+  <bpmn:process id="Kreditorprozess" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_1u5loal">
+      <bpmn:lane id="SekretariatLane" name="Sekretariat">
+        <bpmn:flowNodeRef>RechnungErfasstStartEvent</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="KostenstellenleitungLane" name="Kostenstellenleitung">
+        <bpmn:flowNodeRef>RechnungMateriellPrufenTask</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="AutomatischLane" name="Automatisch">
+        <bpmn:flowNodeRef>ZugehorigeBestellungGefundenGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>AutomatischesPrufergebnisGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>FormalesPrufergebnisGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GesamtBetragGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1iqzvbr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungFormalAbgelehntEndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>MateriellesPrufergebnisGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1jw4fx0</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0qrzd9n</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungZurZahlungFreigegebenEndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungMateriellAbgelehntEndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1k5dzl4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungAutomatischFormellPrufenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>DatenVonZugehorigerBestellungAuslesenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungInERPZurBezahlungErfassenTask</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="KreditorenbuchhaltungLane" name="Kreditorenbuchhaltung">
+        <bpmn:flowNodeRef>Gateway_10ld1xx</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungFormellPrufenTask</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="RechnungErfasstStartEvent" name="Rechnung erfasst" camunda:asyncAfter="true">
+      <bpmn:documentation>Rechnungsdaten:
+- Rechnungsnummer (invoiceNr)
+- Rechnungsdatum (invoiceDate)
+- Fälligkeitsdatum (dueDate)
+- Lieferantenbezeichnung (creditorName)
+- Referenznummer (referenceNr)
+- Rechnungsbetrag (invoiceAmount)
+
+PDF per FileUpload (invoiceFile)</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="invoiceNr" label="Rechnungsnummer" type="long" />
+          <camunda:formField id="invoiceDate" label="Rechnungsdatum" type="date" />
+          <camunda:formField id="dueDate" label="Fälligkeitsdatum" type="date" />
+          <camunda:formField id="creditorName" label="Lieferantenbezeichnung" type="string" />
+          <camunda:formField id="referenceNr" label="Referenznummer" type="long" />
+          <camunda:formField id="invoiceAmount" label="Rechnungsbetrag" type="long" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_1y33xl3</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="ZugehorigeBestellungGefundenGateway" name="Zugehörige Bestellung gefunden?">
+      <bpmn:incoming>Flow_0tbmtn1</bpmn:incoming>
+      <bpmn:outgoing>JaSequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>NeinSequenceFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="AutomatischesPrufergebnisGateway" name="Automatisches Prüfergebnis?">
+      <bpmn:incoming>Flow_13frkl1</bpmn:incoming>
+      <bpmn:outgoing>NegativSequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>PositivSequenceFlow1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="FormalesPrufergebnisGateway" name="Formales Prüfergebnis?">
+      <bpmn:incoming>Flow_00p9c7f</bpmn:incoming>
+      <bpmn:outgoing>PositivSequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>NegativSequenceFlow1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="GesamtBetragGateway" name="Rechnungs-&#10;betrag?">
+      <bpmn:incoming>Flow_0bzaplc</bpmn:incoming>
+      <bpmn:outgoing>CHF100SequenceFlow</bpmn:outgoing>
+      <bpmn:outgoing>CHF100SequenceFlow1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_1iqzvbr">
+      <bpmn:incoming>PositivSequenceFlow</bpmn:incoming>
+      <bpmn:incoming>PositivSequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0bzaplc</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="RechnungFormalAbgelehntEndEvent" name="Rechnung&#10;formal&#10;abgelehnt">
+      <bpmn:incoming>NegativSequenceFlow1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="MateriellesPrufergebnisGateway" name="Materielles Prüfergebnis?">
+      <bpmn:incoming>Flow_1hegwq0</bpmn:incoming>
+      <bpmn:outgoing>NegativSequenceFlow2</bpmn:outgoing>
+      <bpmn:outgoing>PositivSequenceFlow2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_1jw4fx0">
+      <bpmn:incoming>PositivSequenceFlow2</bpmn:incoming>
+      <bpmn:incoming>CHF100SequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yye4ye</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_10ld1xx">
+      <bpmn:incoming>NegativSequenceFlow</bpmn:incoming>
+      <bpmn:incoming>NeinSequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_1cneye0</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1y33xl3" sourceRef="RechnungErfasstStartEvent" targetRef="DatenVonZugehorigerBestellungAuslesenTask" />
+    <bpmn:sequenceFlow id="NegativSequenceFlow" name="Negativ" sourceRef="AutomatischesPrufergebnisGateway" targetRef="Gateway_10ld1xx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!formalCheckResult}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="NeinSequenceFlow" name="Nein" sourceRef="ZugehorigeBestellungGefundenGateway" targetRef="Gateway_10ld1xx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!orderFound}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_00p9c7f" sourceRef="RechnungFormellPrufenTask" targetRef="FormalesPrufergebnisGateway" />
+    <bpmn:sequenceFlow id="CHF100SequenceFlow" name="&#62; CHF 100" sourceRef="GesamtBetragGateway" targetRef="RechnungMateriellPrufenTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${invoiceAmount &gt; 100}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1hegwq0" sourceRef="RechnungMateriellPrufenTask" targetRef="MateriellesPrufergebnisGateway" />
+    <bpmn:sequenceFlow id="Flow_0tbmtn1" sourceRef="DatenVonZugehorigerBestellungAuslesenTask" targetRef="ZugehorigeBestellungGefundenGateway" />
+    <bpmn:sequenceFlow id="JaSequenceFlow" name="Ja" sourceRef="ZugehorigeBestellungGefundenGateway" targetRef="RechnungAutomatischFormellPrufenTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${orderFound}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_13frkl1" sourceRef="RechnungAutomatischFormellPrufenTask" targetRef="AutomatischesPrufergebnisGateway" />
+    <bpmn:sequenceFlow id="PositivSequenceFlow1" name="Positiv" sourceRef="AutomatischesPrufergebnisGateway" targetRef="Gateway_1iqzvbr">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${formalCheckResult}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="PositivSequenceFlow" name="Positiv" sourceRef="FormalesPrufergebnisGateway" targetRef="Gateway_1iqzvbr">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${formalCheckResult}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="NegativSequenceFlow1" name="Negativ" sourceRef="FormalesPrufergebnisGateway" targetRef="RechnungFormalAbgelehntEndEvent">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!formalCheckResult}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0bzaplc" sourceRef="Gateway_1iqzvbr" targetRef="GesamtBetragGateway" />
+    <bpmn:sequenceFlow id="NegativSequenceFlow2" name="Negativ" sourceRef="MateriellesPrufergebnisGateway" targetRef="Activity_1k5dzl4">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!materialCheckResult}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="PositivSequenceFlow2" name="Positiv" sourceRef="MateriellesPrufergebnisGateway" targetRef="Gateway_1jw4fx0">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${materialCheckResult}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1yye4ye" sourceRef="Gateway_1jw4fx0" targetRef="RechnungInERPZurBezahlungErfassenTask" />
+    <bpmn:sequenceFlow id="CHF100SequenceFlow1" name="&#60;= CHF 100" sourceRef="GesamtBetragGateway" targetRef="Gateway_1jw4fx0">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${invoiceAmount &lt;= 100}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1cneye0" sourceRef="Gateway_10ld1xx" targetRef="RechnungFormellPrufenTask" />
+    <bpmn:sequenceFlow id="Flow_1swl9v6" sourceRef="RechnungInERPZurBezahlungErfassenTask" targetRef="Activity_0qrzd9n" />
+    <bpmn:task id="Activity_0qrzd9n" name="Freigabe-bestätigung senden">
+      <bpmn:documentation>Wird umgesetzt mit einem per External Task Pattern eingebundenen Benachrichtungsservice. Hier wird die Kreditorenbuchhaltung per E-Mail benachrichtigt.</bpmn:documentation>
+      <bpmn:incoming>Flow_1swl9v6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hm1zxz</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_0hm1zxz" sourceRef="Activity_0qrzd9n" targetRef="RechnungZurZahlungFreigegebenEndEvent" />
+    <bpmn:endEvent id="RechnungZurZahlungFreigegebenEndEvent" name="Rechnung zur Zahlung freigegeben">
+      <bpmn:incoming>Flow_0hm1zxz</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0eafodb" sourceRef="Activity_1k5dzl4" targetRef="RechnungMateriellAbgelehntEndEvent" />
+    <bpmn:endEvent id="RechnungMateriellAbgelehntEndEvent" name="Rechnung materiell abgelehnt">
+      <bpmn:incoming>Flow_0eafodb</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Activity_1k5dzl4" name="Ablehnungs-entscheid miteilen">
+      <bpmn:documentation>Wird umgesetzt mit einem per External Task Pattern eingebundenen Benachrichtungsservice. Hier wird die Kreditorenbuchhaltung per E-Mail benachrichtigt.</bpmn:documentation>
+      <bpmn:incoming>NegativSequenceFlow2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0eafodb</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="RechnungFormellPrufenTask" name="Rechnung formell prüfen" camunda:asyncAfter="true" camunda:candidateGroups="kreditorenbuchhaltung">
+      <bpmn:documentation>Mitarbeiter wird händisch im ERP nach einer passenden Bestellung suchen. Falls er keine findet, wird er z.B. versuchen, intern herauszufinden, wer der Auslöser dieser Rechnung ist. Falls auch dies nicht gelingt oder andere formale Fehler in der Rechnung sind (z.B. falsche MwSt.), wird er die Rechnung ablehnen.
+
+Das Prüfergebnis (positiv oder negativ) wird in der Variable formalCheckResult (true/false) gespeichert. Zudem wird in der Variable formalCheckComments die Begründung beschrieben, was nicht in Ordnung sei.
+
+Falls das Kostenstellenleiter-Kürzel noch fehlt (keine passende Bestellung), muss dieses von Hand gesetzt werden (costCenterMgr).</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="formalCheckResult" label="Prüfergebnis" type="boolean" />
+          <camunda:formField id="formalCheckComments" label="Begründung" type="string" />
+          <camunda:formField id="costCenterMgr" label="Kostenstellenleiter-Kürzel" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1cneye0</bpmn:incoming>
+      <bpmn:outgoing>Flow_00p9c7f</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="RechnungMateriellPrufenTask" name="Rechnung materiell prüfen" camunda:asyncAfter="true" camunda:assignee="${costCenterMgr}">
+      <bpmn:documentation>Aufgabe geht an den Benutzer mit dem Kürzel in costCenterMgr. Dieser prüft anhand der Rechnungsdatei, ob er alle aufgeführten Positionen in ausreichender Qualität erhalten hat.
+
+
+Das Prüfergebnis (positiv oder negativ) wird in der Variable materialCheckResult (true/false) gespeichert. Zudem wird in der Variable materialCheckComments eine Begründung beschrieben, was nicht in Ordnung sei.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="materialCheckResult" label="Prüfergebnis" type="boolean" />
+          <camunda:formField id="materialCheckComments" label="Begründung" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>CHF100SequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hegwq0</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:businessRuleTask id="RechnungAutomatischFormellPrufenTask" name="Rechnung automatisch formell prüfen" camunda:asyncAfter="true" camunda:resultVariable="formalCheckResult" camunda:decisionRef="InvoiceAutomaticValidation" camunda:mapDecisionResult="singleEntry">
+      <bpmn:documentation>Prüfung basierend auf den Variablen:
+- invoiceAmount
+- Matching von invoiceAmount und orderAmount
+- creditorInvoiceReclamationCount
+- creditorOrderCount
+
+
+Das Ergebnis (automatische Prüfung positiv oder negativ) wird in der Variable formalCheckResult (true/false) gespeichert.</bpmn:documentation>
+      <bpmn:incoming>JaSequenceFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_13frkl1</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:serviceTask id="DatenVonZugehorigerBestellungAuslesenTask" name="Daten von zugehöriger Bestellung auslesen" camunda:asyncAfter="true" camunda:delegateExpression="${getOrderAndCreditorDataAdapter}">
+      <bpmn:documentation>Via REST API zum gemockten ERP. Suche über Referenznummer (referenceNr). Ob eine Bestellung gefunden wurde oder nicht, in Variable orderFound (true/false) ausgeben.
+
+Bestelldaten:
+- Bestellungsbetrag (orderAmount)
+- Kostenstellenleiter-Kürzel (costCenterMgr)
+
+Lieferantendaten:
+- Anzahl bisheriger Bestellungen (creditorOrderCount)
+- Anzahl Rechnungsreklamationen (creditorInvoiceReclamationCount)</bpmn:documentation>
+      <bpmn:incoming>Flow_1y33xl3</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tbmtn1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="RechnungInERPZurBezahlungErfassenTask" name="Rechnung in ERP zur Bezahlung erfassen" camunda:delegateExpression="${postInvoiceAdapter}">
+      <bpmn:documentation>In Realität natürlich deutlich komplexer, vor allem dann, wenn keine zugehörige Bestellung vorhanden ist. Wir begnügen uns mit folgender Variante:
+
+
+1. Über die ERP-API wird nach einem Lieferant mit der Bezeichnung creditorName gesucht. Zurück kommt die Lieferanten-Id creditorId oder die Meldung, dass kein Lieferant gefunden wurde. Letzteren Fall ignorieren wir -&gt; Exception werfen.
+
+
+2. Wir übergeben der ERP-API eine neue Rechnung mit den Angaben creditorId, invoiceNr, invoiceAmount, invoiceDate.
+
+
+3. Als Antwort erhalten wir eine Erfolgsbestätigung oder Fehlermeldung. Den zweiten Fall ignorieren wir -&gt; Exception werfen.</bpmn:documentation>
+      <bpmn:incoming>Flow_1yye4ye</bpmn:incoming>
+      <bpmn:outgoing>Flow_1swl9v6</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:process id="Process_161542n" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_147l1z9">
+      <bpmn:lane id="SonstigesLane1" name="Sonstiges">
+        <bpmn:flowNodeRef>UbereinstimmungRechnungUndLeistungPrufenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ZuPrufendeRechnungErhaltenStartEvent</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="ProzessportalLane1" name="Prozessportal">
+        <bpmn:flowNodeRef>RechnungOffnenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PrufergebnisFesthaltenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungGepruftEndEvent</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:task id="RechnungOffnenTask" name="Rechnung öffnen">
+      <bpmn:incoming>Flow_1f5xx2x</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xg88ch</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="UbereinstimmungRechnungUndLeistungPrufenTask" name="Überein-stimmung Rechnung und Leistung prüfen">
+      <bpmn:incoming>Flow_1xg88ch</bpmn:incoming>
+      <bpmn:outgoing>Flow_1h96y0w</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="PrufergebnisFesthaltenTask" name="Prüfergebnis festhalten">
+      <bpmn:incoming>Flow_1h96y0w</bpmn:incoming>
+      <bpmn:outgoing>Flow_1emw9b0</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="RechnungGepruftEndEvent" name="Rechnung&#10;geprüft">
+      <bpmn:incoming>Flow_1emw9b0</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="ZuPrufendeRechnungErhaltenStartEvent" name="Zu prüfende Rechnung erhalten">
+      <bpmn:outgoing>Flow_1f5xx2x</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_14hdgiv" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1f5xx2x" sourceRef="ZuPrufendeRechnungErhaltenStartEvent" targetRef="RechnungOffnenTask" />
+    <bpmn:sequenceFlow id="Flow_1xg88ch" sourceRef="RechnungOffnenTask" targetRef="UbereinstimmungRechnungUndLeistungPrufenTask" />
+    <bpmn:sequenceFlow id="Flow_1emw9b0" sourceRef="PrufergebnisFesthaltenTask" targetRef="RechnungGepruftEndEvent" />
+    <bpmn:sequenceFlow id="Flow_1h96y0w" sourceRef="UbereinstimmungRechnungUndLeistungPrufenTask" targetRef="PrufergebnisFesthaltenTask" />
+  </bpmn:process>
+  <bpmn:process id="Process_0dpofpu" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_074i1kd">
+      <bpmn:lane id="ProzessportalLane2" name="Prozessportal">
+        <bpmn:flowNodeRef>RechnungOffnenTask1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PrufergebnisFesthaltenTask1</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="SonstigesLane2" name="Sonstiges">
+        <bpmn:flowNodeRef>InERPNachPassenderBestellungSuchenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ZuPrufendeRechnungErhaltenStartEvent1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BestellungGefundenGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>MoglicherInternerAuftraggeberErmittelnTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungMitBestellungVergleichenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BestellungNachtraglichErfassenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>AuftraggeberGefundenGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_0nzd3ln</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>AufFormaleFehlerPrufenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1fdrnpk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PrufErgebnisGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungMateriellAbgelehntEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungZurZahlungFreigegebenEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_01q843l</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungRetournierenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungBezahlenSubProcess</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungArchivierenSubProcess</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungErledigtEndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RechnungAbgelehntEndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1vg4nqz</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_0g6fdgr" sourceRef="ZuPrufendeRechnungErhaltenStartEvent1" targetRef="RechnungOffnenTask1" />
+    <bpmn:sequenceFlow id="Flow_0wu8nyc" sourceRef="RechnungOffnenTask1" targetRef="InERPNachPassenderBestellungSuchenTask" />
+    <bpmn:task id="RechnungOffnenTask1" name="Rechnung öffnen">
+      <bpmn:incoming>Flow_0g6fdgr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wu8nyc</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="InERPNachPassenderBestellungSuchenTask" name="In ERP nach passender Bestellung suchen">
+      <bpmn:incoming>Flow_0wu8nyc</bpmn:incoming>
+      <bpmn:outgoing>Flow_1cci1sp</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:startEvent id="ZuPrufendeRechnungErhaltenStartEvent1" name="Zu prüfende Rechnung erhalten">
+      <bpmn:outgoing>Flow_0g6fdgr</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_17bth7v" />
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="BestellungGefundenGateway" name="Bestellung gefunden?">
+      <bpmn:incoming>Flow_1cci1sp</bpmn:incoming>
+      <bpmn:outgoing>JaSequenceFlow1</bpmn:outgoing>
+      <bpmn:outgoing>NeinSequenceFlow1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="MoglicherInternerAuftraggeberErmittelnTask" name="Möglicher interner Auftraggeber ermitteln">
+      <bpmn:incoming>NeinSequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>Flow_1c6q7p6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="RechnungMitBestellungVergleichenTask" name="Rechnung mit Bestellung vergleichen">
+      <bpmn:incoming>JaSequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0dzb5qq</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1cci1sp" sourceRef="InERPNachPassenderBestellungSuchenTask" targetRef="BestellungGefundenGateway" />
+    <bpmn:sequenceFlow id="JaSequenceFlow1" name="Ja" sourceRef="BestellungGefundenGateway" targetRef="RechnungMitBestellungVergleichenTask" />
+    <bpmn:sequenceFlow id="NeinSequenceFlow1" name="Nein" sourceRef="BestellungGefundenGateway" targetRef="MoglicherInternerAuftraggeberErmittelnTask" />
+    <bpmn:sequenceFlow id="Flow_1c6q7p6" sourceRef="MoglicherInternerAuftraggeberErmittelnTask" targetRef="AuftraggeberGefundenGateway" />
+    <bpmn:sequenceFlow id="JaSequenceFlow2" name="Ja" sourceRef="AuftraggeberGefundenGateway" targetRef="BestellungNachtraglichErfassenTask" />
+    <bpmn:sequenceFlow id="Flow_0dzb5qq" sourceRef="RechnungMitBestellungVergleichenTask" targetRef="Gateway_0nzd3ln" />
+    <bpmn:task id="BestellungNachtraglichErfassenTask" name="Bestellung nachträglich erfassen">
+      <bpmn:incoming>JaSequenceFlow2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0x9g810</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="AuftraggeberGefundenGateway" name="Auftraggeber gefunden?">
+      <bpmn:incoming>Flow_1c6q7p6</bpmn:incoming>
+      <bpmn:outgoing>JaSequenceFlow2</bpmn:outgoing>
+      <bpmn:outgoing>NeinSequenceFlow2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_0nzd3ln">
+      <bpmn:incoming>Flow_0dzb5qq</bpmn:incoming>
+      <bpmn:incoming>Flow_0x9g810</bpmn:incoming>
+      <bpmn:outgoing>Flow_0dll5fa</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0dll5fa" sourceRef="Gateway_0nzd3ln" targetRef="AufFormaleFehlerPrufenTask" />
+    <bpmn:sequenceFlow id="Flow_0x9g810" sourceRef="BestellungNachtraglichErfassenTask" targetRef="Gateway_0nzd3ln" />
+    <bpmn:task id="AufFormaleFehlerPrufenTask" name="Auf formale Fehler prüfen">
+      <bpmn:incoming>Flow_0dll5fa</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rint07</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_1fdrnpk">
+      <bpmn:incoming>Flow_1rint07</bpmn:incoming>
+      <bpmn:incoming>NeinSequenceFlow2</bpmn:incoming>
+      <bpmn:outgoing>Flow_02voyco</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1rint07" sourceRef="AufFormaleFehlerPrufenTask" targetRef="Gateway_1fdrnpk" />
+    <bpmn:sequenceFlow id="NeinSequenceFlow2" name="Nein" sourceRef="AuftraggeberGefundenGateway" targetRef="Gateway_1fdrnpk" />
+    <bpmn:sequenceFlow id="Flow_02voyco" sourceRef="Gateway_1fdrnpk" targetRef="PrufergebnisFesthaltenTask1" />
+    <bpmn:task id="PrufergebnisFesthaltenTask1" name="Prüfergebnis festhalten">
+      <bpmn:incoming>Flow_02voyco</bpmn:incoming>
+      <bpmn:outgoing>Flow_04weep5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_04weep5" sourceRef="PrufergebnisFesthaltenTask1" targetRef="PrufErgebnisGateway" />
+    <bpmn:exclusiveGateway id="PrufErgebnisGateway" name="Prüf-&#10;ergebnis?">
+      <bpmn:incoming>Flow_04weep5</bpmn:incoming>
+      <bpmn:outgoing>PositivSequenceFlow3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1itz0p4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="PositivSequenceFlow3" name="Positiv" sourceRef="PrufErgebnisGateway" targetRef="Gateway_01q843l" />
+    <bpmn:sequenceFlow id="Flow_1aqa049" sourceRef="Gateway_01q843l" targetRef="RechnungMateriellAbgelehntEvent" />
+    <bpmn:intermediateCatchEvent id="RechnungMateriellAbgelehntEvent" name="Rechnung materiell abgelehnt">
+      <bpmn:incoming>Flow_1aqa049</bpmn:incoming>
+      <bpmn:outgoing>Flow_00lhdnv</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1w0p76v" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0y9q9b5" sourceRef="Gateway_01q843l" targetRef="RechnungZurZahlungFreigegebenEvent" />
+    <bpmn:intermediateCatchEvent id="RechnungZurZahlungFreigegebenEvent" name="Rechnung zur Zahlung freigegeben">
+      <bpmn:incoming>Flow_0y9q9b5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1fx9p8x</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_05k7vlp" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1fx9p8x" sourceRef="RechnungZurZahlungFreigegebenEvent" targetRef="RechnungBezahlenSubProcess" />
+    <bpmn:subProcess id="RechnungBezahlenSubProcess" name="Rechnung bezahlen">
+      <bpmn:incoming>Flow_1fx9p8x</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yx8cyx</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_1yx8cyx" sourceRef="RechnungBezahlenSubProcess" targetRef="RechnungArchivierenSubProcess" />
+    <bpmn:subProcess id="RechnungArchivierenSubProcess" name="Rechnung archivieren">
+      <bpmn:incoming>Flow_1yx8cyx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0viynfn</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_0viynfn" sourceRef="RechnungArchivierenSubProcess" targetRef="RechnungErledigtEndEvent" />
+    <bpmn:endEvent id="RechnungErledigtEndEvent" name="Rechnung erledigt">
+      <bpmn:incoming>Flow_0viynfn</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:eventBasedGateway id="Gateway_01q843l">
+      <bpmn:incoming>PositivSequenceFlow3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1aqa049</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0y9q9b5</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:task id="RechnungRetournierenTask" name="Rechnung retournieren">
+      <bpmn:incoming>Flow_1itz0p4</bpmn:incoming>
+      <bpmn:outgoing>Flow_0shhu5d</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1itz0p4" name="Negativ" sourceRef="PrufErgebnisGateway" targetRef="RechnungRetournierenTask" />
+    <bpmn:endEvent id="RechnungAbgelehntEndEvent" name="Rechnung abgelehnt">
+      <bpmn:incoming>Flow_0shhu5d</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0shhu5d" sourceRef="RechnungRetournierenTask" targetRef="RechnungAbgelehntEndEvent" />
+    <bpmn:sequenceFlow id="Flow_00lhdnv" sourceRef="RechnungMateriellAbgelehntEvent" targetRef="Event_1vg4nqz" />
+    <bpmn:endEvent id="Event_1vg4nqz" name="Rechnung materiell abgelehnt">
+      <bpmn:incoming>Flow_00lhdnv</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_06vozgy">
+      <bpmndi:BPMNShape id="Participant_17v18v1_di" bpmnElement="SekretariatParticipant" isHorizontal="true" bioc:stroke="rgb(30, 136, 229)" bioc:fill="rgb(187, 222, 251)">
+        <dc:Bounds x="620" y="80" width="760" height="352" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0ffmvvm_di" bpmnElement="ProzessportalLane" isHorizontal="true">
+        <dc:Bounds x="650" y="307" width="730" height="125" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0l6tlv2_di" bpmnElement="SonstigesLane" isHorizontal="true">
+        <dc:Bounds x="650" y="80" width="730" height="227" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_10upow0_di" bpmnElement="Flow_10upow0">
+        <di:waypoint x="1250" y="370" />
+        <di:waypoint x="1302" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ec63zs_di" bpmnElement="Flow_1ec63zs">
+        <di:waypoint x="1110" y="140" />
+        <di:waypoint x="1130" y="140" />
+        <di:waypoint x="1130" y="370" />
+        <di:waypoint x="1150" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o3xkun_di" bpmnElement="Flow_0o3xkun">
+        <di:waypoint x="890" y="240" />
+        <di:waypoint x="950" y="240" />
+        <di:waypoint x="950" y="165" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17hr1ed_di" bpmnElement="Flow_17hr1ed">
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="1010" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01z6z8i_di" bpmnElement="Flow_01z6z8i">
+        <di:waypoint x="738" y="240" />
+        <di:waypoint x="790" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a2wd44_di" bpmnElement="Flow_1a2wd44">
+        <di:waypoint x="890" y="140" />
+        <di:waypoint x="925" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vvo25c_di" bpmnElement="Flow_1vvo25c">
+        <di:waypoint x="738" y="140" />
+        <di:waypoint x="790" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0c2j9zg_di" bpmnElement="RechnungPhysischEingetroffenStartEvent">
+        <dc:Bounds x="702" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="691" y="165" width="58" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1u7llox_di" bpmnElement="RechnungNachPDFScannenTask">
+        <dc:Bounds x="790" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1y15b1n_di" bpmnElement="RechnungDigitalEingetroffenStartEvent">
+        <dc:Bounds x="702" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="679" y="265" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1b93kpc_di" bpmnElement="RechnungAusdruckenTask">
+        <dc:Bounds x="790" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_16slpzd_di" bpmnElement="Gateway_16slpzd" isMarkerVisible="true">
+        <dc:Bounds x="925" y="115" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_15sblnz_di" bpmnElement="PapierrechnungInOrdnerAblegenTask">
+        <dc:Bounds x="1010" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_191pp05_di" bpmnElement="RechnungErfassenTask">
+        <dc:Bounds x="1150" y="330" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ye8dvl_di" bpmnElement="RechnungErfasstEndEvent">
+        <dc:Bounds x="1302" y="352" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1276" y="395" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0kujxzj_di" bpmnElement="ProzessportalParticipant" isHorizontal="true">
+        <dc:Bounds x="280" y="500" width="2150" height="680" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0nxen18_di" bpmnElement="KreditorenbuchhaltungLane" isHorizontal="true" bioc:stroke="rgb(142, 36, 170)" bioc:fill="rgb(225, 190, 231)">
+        <dc:Bounds x="310" y="1040" width="2120" height="140" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_16aqods_di" bpmnElement="AutomatischLane" isHorizontal="true">
+        <dc:Bounds x="310" y="730" width="2120" height="310" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0k9wbbr_di" bpmnElement="KostenstellenleitungLane" isHorizontal="true" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="310" y="610" width="2120" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0s8cx8b_di" bpmnElement="SekretariatLane" isHorizontal="true" bioc:stroke="rgb(30, 136, 229)" bioc:fill="rgb(187, 222, 251)">
+        <dc:Bounds x="310" y="500" width="2120" height="110" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0eafodb_di" bpmnElement="Flow_0eafodb">
+        <di:waypoint x="1760" y="970" />
+        <di:waypoint x="1802" y="970" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hm1zxz_di" bpmnElement="Flow_0hm1zxz">
+        <di:waypoint x="2150" y="830" />
+        <di:waypoint x="2202" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1swl9v6_di" bpmnElement="Flow_1swl9v6">
+        <di:waypoint x="1990" y="830" />
+        <di:waypoint x="2050" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1cneye0_di" bpmnElement="Flow_1cneye0">
+        <di:waypoint x="935" y="1110" />
+        <di:waypoint x="990" y="1110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10dgakm_di" bpmnElement="CHF100SequenceFlow1">
+        <di:waypoint x="1450" y="855" />
+        <di:waypoint x="1450" y="1030" />
+        <di:waypoint x="1890" y="1030" />
+        <di:waypoint x="1890" y="890" />
+        <di:waypoint x="1800" y="890" />
+        <di:waypoint x="1800" y="855" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1460" y="880" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yye4ye_di" bpmnElement="Flow_1yye4ye">
+        <di:waypoint x="1825" y="830" />
+        <di:waypoint x="1890" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qxp7ep_di" bpmnElement="PositivSequenceFlow2">
+        <di:waypoint x="1655" y="830" />
+        <di:waypoint x="1775" y="830" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1667" y="812" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ax4iqv_di" bpmnElement="NegativSequenceFlow2">
+        <di:waypoint x="1630" y="855" />
+        <di:waypoint x="1630" y="970" />
+        <di:waypoint x="1660" y="970" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1641" y="863" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0bzaplc_di" bpmnElement="Flow_0bzaplc">
+        <di:waypoint x="1375" y="830" />
+        <di:waypoint x="1425" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1w0dhdw_di" bpmnElement="NegativSequenceFlow1">
+        <di:waypoint x="1170" y="855" />
+        <di:waypoint x="1170" y="890" />
+        <di:waypoint x="1232" y="890" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1181" y="869" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nmpvbq_di" bpmnElement="PositivSequenceFlow">
+        <di:waypoint x="1195" y="830" />
+        <di:waypoint x="1325" y="830" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1213" y="812" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xcdnet_di" bpmnElement="PositivSequenceFlow1">
+        <di:waypoint x="910" y="805" />
+        <di:waypoint x="910" y="750" />
+        <di:waypoint x="1350" y="750" />
+        <di:waypoint x="1350" y="805" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="923" y="768" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13frkl1_di" bpmnElement="Flow_13frkl1">
+        <di:waypoint x="830" y="830" />
+        <di:waypoint x="885" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1lsqjig_di" bpmnElement="JaSequenceFlow">
+        <di:waypoint x="675" y="830" />
+        <di:waypoint x="730" y="830" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="697" y="812" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tbmtn1_di" bpmnElement="Flow_0tbmtn1">
+        <di:waypoint x="570" y="830" />
+        <di:waypoint x="625" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hegwq0_di" bpmnElement="Flow_1hegwq0">
+        <di:waypoint x="1590" y="670" />
+        <di:waypoint x="1630" y="670" />
+        <di:waypoint x="1630" y="805" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ay07ae_di" bpmnElement="CHF100SequenceFlow">
+        <di:waypoint x="1450" y="805" />
+        <di:waypoint x="1450" y="670" />
+        <di:waypoint x="1490" y="670" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1463" y="780" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00p9c7f_di" bpmnElement="Flow_00p9c7f">
+        <di:waypoint x="1090" y="1110" />
+        <di:waypoint x="1120" y="1110" />
+        <di:waypoint x="1120" y="830" />
+        <di:waypoint x="1145" y="830" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0bxh51q_di" bpmnElement="NeinSequenceFlow">
+        <di:waypoint x="650" y="855" />
+        <di:waypoint x="650" y="1110" />
+        <di:waypoint x="885" y="1110" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="658" y="868" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12w4olx_di" bpmnElement="NegativSequenceFlow">
+        <di:waypoint x="910" y="855" />
+        <di:waypoint x="910" y="1085" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="921" y="868" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1y33xl3_di" bpmnElement="Flow_1y33xl3">
+        <di:waypoint x="398" y="550" />
+        <di:waypoint x="520" y="550" />
+        <di:waypoint x="520" y="790" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1tkqdr2_di" bpmnElement="RechnungErfasstStartEvent">
+        <dc:Bounds x="362" y="532" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="336" y="575" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0b6c5qm_di" bpmnElement="ZugehorigeBestellungGefundenGateway" isMarkerVisible="true">
+        <dc:Bounds x="625" y="805" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="622" y="755" width="55" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1e4lu1a_di" bpmnElement="AutomatischesPrufergebnisGateway" isMarkerVisible="true">
+        <dc:Bounds x="885" y="805" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="943" y="823" width="72" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0ahshg0_di" bpmnElement="FormalesPrufergebnisGateway" isMarkerVisible="true">
+        <dc:Bounds x="1145" y="805" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1135" y="766" width="69" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1x6te53_di" bpmnElement="GesamtBetragGateway" isMarkerVisible="true">
+        <dc:Bounds x="1425" y="805" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1390" y="780" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1iqzvbr_di" bpmnElement="Gateway_1iqzvbr" isMarkerVisible="true">
+        <dc:Bounds x="1325" y="805" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0vp4ard_di" bpmnElement="RechnungFormalAbgelehntEndEvent">
+        <dc:Bounds x="1232" y="872" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1225" y="915" width="51" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_168ytqk_di" bpmnElement="MateriellesPrufergebnisGateway" isMarkerVisible="true">
+        <dc:Bounds x="1605" y="805" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1545" y="792" width="69" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1jw4fx0_di" bpmnElement="Gateway_1jw4fx0" isMarkerVisible="true">
+        <dc:Bounds x="1775" y="805" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_10ld1xx_di" bpmnElement="Gateway_10ld1xx" isMarkerVisible="true">
+        <dc:Bounds x="885" y="1085" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0qrzd9n_di" bpmnElement="Activity_0qrzd9n">
+        <dc:Bounds x="2050" y="790" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1am22tg_di" bpmnElement="RechnungZurZahlungFreigegebenEndEvent">
+        <dc:Bounds x="2202" y="812" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2185" y="860" width="70" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0bssrlm_di" bpmnElement="RechnungMateriellAbgelehntEndEvent">
+        <dc:Bounds x="1802" y="952" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1794" y="910" width="51" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1k5dzl4_di" bpmnElement="Activity_1k5dzl4">
+        <dc:Bounds x="1660" y="930" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0hfk4mn_di" bpmnElement="RechnungFormellPrufenTask">
+        <dc:Bounds x="990" y="1070" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1uwps0c_di" bpmnElement="RechnungMateriellPrufenTask">
+        <dc:Bounds x="1490" y="630" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_06z8uns_di" bpmnElement="RechnungAutomatischFormellPrufenTask">
+        <dc:Bounds x="730" y="790" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0fnb1t5_di" bpmnElement="DatenVonZugehorigerBestellungAuslesenTask">
+        <dc:Bounds x="470" y="790" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ip4lox_di" bpmnElement="RechnungInERPZurBezahlungErfassenTask">
+        <dc:Bounds x="1890" y="790" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0guif6x_di" bpmnElement="ERPParticipant" isHorizontal="true">
+        <dc:Bounds x="280" y="372" width="300" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_1q4ek6a_di" bpmnElement="ERPParticipant1" isHorizontal="true">
+        <dc:Bounds x="2130" y="372" width="300" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_11qy849_di" bpmnElement="KostenstellenleitungParticipant" isHorizontal="true" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="1430" y="80" width="660" height="352" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1ffaxgu_di" bpmnElement="ProzessportalLane1" isHorizontal="true">
+        <dc:Bounds x="1460" y="307" width="630" height="125" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0wj2xl1_di" bpmnElement="SonstigesLane1" isHorizontal="true">
+        <dc:Bounds x="1460" y="80" width="630" height="227" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1h96y0w_di" bpmnElement="Flow_1h96y0w">
+        <di:waypoint x="1840" y="200" />
+        <di:waypoint x="1860" y="200" />
+        <di:waypoint x="1860" y="370" />
+        <di:waypoint x="1880" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1emw9b0_di" bpmnElement="Flow_1emw9b0">
+        <di:waypoint x="1980" y="370" />
+        <di:waypoint x="2022" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xg88ch_di" bpmnElement="Flow_1xg88ch">
+        <di:waypoint x="1700" y="370" />
+        <di:waypoint x="1720" y="370" />
+        <di:waypoint x="1720" y="200" />
+        <di:waypoint x="1740" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1f5xx2x_di" bpmnElement="Flow_1f5xx2x">
+        <di:waypoint x="1538" y="200" />
+        <di:waypoint x="1570" y="200" />
+        <di:waypoint x="1570" y="370" />
+        <di:waypoint x="1600" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_1ue6e2r_di" bpmnElement="RechnungOffnenTask">
+        <dc:Bounds x="1600" y="330" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0aro6un_di" bpmnElement="UbereinstimmungRechnungUndLeistungPrufenTask">
+        <dc:Bounds x="1740" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fzg1te_di" bpmnElement="PrufergebnisFesthaltenTask">
+        <dc:Bounds x="1880" y="330" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1vuufj5_di" bpmnElement="RechnungGepruftEndEvent">
+        <dc:Bounds x="2022" y="352" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2015" y="395" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1darvhj_di" bpmnElement="ZuPrufendeRechnungErhaltenStartEvent">
+        <dc:Bounds x="1502" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1490" y="132" width="59" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0iyzera_di" bpmnElement="KreditorenbuchhaltungParticipant" isHorizontal="true" bioc:stroke="rgb(142, 36, 170)" bioc:fill="rgb(225, 190, 231)">
+        <dc:Bounds x="280" y="1250" width="2150" height="422" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_000yolp_di" bpmnElement="SonstigesLane2" isHorizontal="true">
+        <dc:Bounds x="310" y="1370" width="2120" height="302" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1u4wp5v_di" bpmnElement="ProzessportalLane2" isHorizontal="true">
+        <dc:Bounds x="310" y="1250" width="2120" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_00lhdnv_di" bpmnElement="Flow_00lhdnv">
+        <di:waypoint x="1908" y="1436" />
+        <di:waypoint x="1992" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0shhu5d_di" bpmnElement="Flow_0shhu5d">
+        <di:waypoint x="1770" y="1600" />
+        <di:waypoint x="1822" y="1600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1itz0p4_di" bpmnElement="Flow_1itz0p4">
+        <di:waypoint x="1650" y="1461" />
+        <di:waypoint x="1650" y="1600" />
+        <di:waypoint x="1670" y="1600" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1661" y="1473" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0viynfn_di" bpmnElement="Flow_0viynfn">
+        <di:waypoint x="2310" y="1550" />
+        <di:waypoint x="2362" y="1550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yx8cyx_di" bpmnElement="Flow_1yx8cyx">
+        <di:waypoint x="2150" y="1550" />
+        <di:waypoint x="2210" y="1550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fx9p8x_di" bpmnElement="Flow_1fx9p8x">
+        <di:waypoint x="1978" y="1550" />
+        <di:waypoint x="2050" y="1550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0y9q9b5_di" bpmnElement="Flow_0y9q9b5">
+        <di:waypoint x="1810" y="1461" />
+        <di:waypoint x="1810" y="1550" />
+        <di:waypoint x="1942" y="1550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1aqa049_di" bpmnElement="Flow_1aqa049">
+        <di:waypoint x="1835" y="1436" />
+        <di:waypoint x="1872" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hdrbn5_di" bpmnElement="PositivSequenceFlow3">
+        <di:waypoint x="1675" y="1436" />
+        <di:waypoint x="1785" y="1436" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1701" y="1418" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04weep5_di" bpmnElement="Flow_04weep5">
+        <di:waypoint x="1620" y="1310" />
+        <di:waypoint x="1650" y="1310" />
+        <di:waypoint x="1650" y="1411" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02voyco_di" bpmnElement="Flow_02voyco">
+        <di:waypoint x="1490" y="1411" />
+        <di:waypoint x="1490" y="1310" />
+        <di:waypoint x="1520" y="1310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k7xzf7_di" bpmnElement="NeinSequenceFlow2">
+        <di:waypoint x="1050" y="1561" />
+        <di:waypoint x="1050" y="1600" />
+        <di:waypoint x="1490" y="1600" />
+        <di:waypoint x="1490" y="1461" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1058" y="1563" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rint07_di" bpmnElement="Flow_1rint07">
+        <di:waypoint x="1430" y="1436" />
+        <di:waypoint x="1465" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0x9g810_di" bpmnElement="Flow_0x9g810">
+        <di:waypoint x="1240" y="1536" />
+        <di:waypoint x="1270" y="1536" />
+        <di:waypoint x="1270" y="1461" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dll5fa_di" bpmnElement="Flow_0dll5fa">
+        <di:waypoint x="1295" y="1436" />
+        <di:waypoint x="1330" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dzb5qq_di" bpmnElement="Flow_0dzb5qq">
+        <di:waypoint x="950" y="1436" />
+        <di:waypoint x="1245" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16n8etn_di" bpmnElement="JaSequenceFlow2">
+        <di:waypoint x="1075" y="1536" />
+        <di:waypoint x="1140" y="1536" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1084" y="1518" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1c6q7p6_di" bpmnElement="Flow_1c6q7p6">
+        <di:waypoint x="950" y="1536" />
+        <di:waypoint x="1025" y="1536" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0oweomw_di" bpmnElement="NeinSequenceFlow1">
+        <di:waypoint x="780" y="1461" />
+        <di:waypoint x="780" y="1536" />
+        <di:waypoint x="850" y="1536" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="798" y="1513" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15p6rct_di" bpmnElement="JaSequenceFlow1">
+        <di:waypoint x="805" y="1436" />
+        <di:waypoint x="850" y="1436" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="814" y="1418" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1cci1sp_di" bpmnElement="Flow_1cci1sp">
+        <di:waypoint x="710" y="1436" />
+        <di:waypoint x="755" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wu8nyc_di" bpmnElement="Flow_0wu8nyc">
+        <di:waypoint x="550" y="1310" />
+        <di:waypoint x="580" y="1310" />
+        <di:waypoint x="580" y="1436" />
+        <di:waypoint x="610" y="1436" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0g6fdgr_di" bpmnElement="Flow_0g6fdgr">
+        <di:waypoint x="388" y="1436" />
+        <di:waypoint x="419" y="1436" />
+        <di:waypoint x="419" y="1310" />
+        <di:waypoint x="450" y="1310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0cq36vb_di" bpmnElement="RechnungOffnenTask1">
+        <dc:Bounds x="450" y="1270" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_07sucny_di" bpmnElement="InERPNachPassenderBestellungSuchenTask">
+        <dc:Bounds x="610" y="1396" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_13xsjn1_di" bpmnElement="ZuPrufendeRechnungErhaltenStartEvent1">
+        <dc:Bounds x="352" y="1418" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="340" y="1464" width="59" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0jdzd04_di" bpmnElement="BestellungGefundenGateway" isMarkerVisible="true">
+        <dc:Bounds x="755" y="1411" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="754" y="1382" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0l7ieua_di" bpmnElement="MoglicherInternerAuftraggeberErmittelnTask">
+        <dc:Bounds x="850" y="1496" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_088o3ha_di" bpmnElement="RechnungMitBestellungVergleichenTask">
+        <dc:Bounds x="850" y="1396" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1wdzc03_di" bpmnElement="BestellungNachtraglichErfassenTask">
+        <dc:Bounds x="1140" y="1496" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1jhas3z_di" bpmnElement="AuftraggeberGefundenGateway" isMarkerVisible="true">
+        <dc:Bounds x="1025" y="1511" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1018" y="1474" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0nzd3ln_di" bpmnElement="Gateway_0nzd3ln" isMarkerVisible="true">
+        <dc:Bounds x="1245" y="1411" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1vzrzsd_di" bpmnElement="AufFormaleFehlerPrufenTask">
+        <dc:Bounds x="1330" y="1396" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1fdrnpk_di" bpmnElement="Gateway_1fdrnpk" isMarkerVisible="true">
+        <dc:Bounds x="1465" y="1411" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_09ln430_di" bpmnElement="PrufergebnisFesthaltenTask1">
+        <dc:Bounds x="1520" y="1270" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0x4pvb8_di" bpmnElement="PrufErgebnisGateway" isMarkerVisible="true">
+        <dc:Bounds x="1625" y="1411" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1566" y="1422" width="49" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_03z4scz_di" bpmnElement="RechnungMateriellAbgelehntEvent">
+        <dc:Bounds x="1872" y="1418" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1865" y="1461" width="51" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0aw0esl_di" bpmnElement="RechnungZurZahlungFreigegebenEvent">
+        <dc:Bounds x="1942" y="1532" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1926" y="1575" width="70" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1gy7br4_di" bpmnElement="RechnungBezahlenSubProcess">
+        <dc:Bounds x="2050" y="1510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1voxic9_di" bpmnElement="RechnungArchivierenSubProcess">
+        <dc:Bounds x="2210" y="1510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_19trvjk_di" bpmnElement="RechnungErledigtEndEvent">
+        <dc:Bounds x="2362" y="1532" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2355" y="1575" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1muedug_di" bpmnElement="Gateway_01q843l">
+        <dc:Bounds x="1785" y="1411" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05p9rsk_di" bpmnElement="RechnungRetournierenTask">
+        <dc:Bounds x="1670" y="1560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1vdyvzp_di" bpmnElement="RechnungAbgelehntEndEvent">
+        <dc:Bounds x="1822" y="1582" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1815" y="1625" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1vg4nqz_di" bpmnElement="Event_1vg4nqz">
+        <dc:Bounds x="1992" y="1418" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1985" y="1461" width="51" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0m3t1tx_di" bpmnElement="LieferantParticipant" isHorizontal="true">
+        <dc:Bounds x="1580" y="1740" width="610" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0oqtehx_di" bpmnElement="RechnungsdatenUndPDFMessageFlow" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <di:waypoint x="1200" y="410" />
+        <di:waypoint x="1200" y="480" />
+        <di:waypoint x="380" y="480" />
+        <di:waypoint x="380" y="532" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1098" y="446" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_019yo0n_di" bpmnElement="ReferenzNummerMessageFlow">
+        <di:waypoint x="540" y="870" />
+        <di:waypoint x="540" y="960" />
+        <di:waypoint x="220" y="960" />
+        <di:waypoint x="220" y="392" />
+        <di:waypoint x="280" y="392" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="155" y="416" width="49" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1er77g3_di" bpmnElement="BestelldatenUndLieferantendatenMessageFlow" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <di:waypoint x="280" y="412" />
+        <di:waypoint x="250" y="412" />
+        <di:waypoint x="250" y="940" />
+        <di:waypoint x="500" y="940" />
+        <di:waypoint x="500" y="870" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="268" y="446" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jzt50l_di" bpmnElement="LieferantenbezeichnungUndRechnungsdatenMessageFlow">
+        <di:waypoint x="1930" y="790" />
+        <di:waypoint x="1930" y="750" />
+        <di:waypoint x="2240" y="750" />
+        <di:waypoint x="2240" y="432" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2138" y="450" width="84" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bbf40b_di" bpmnElement="ErfolgsOderFehlermeldungMessageFlow" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <di:waypoint x="2310" y="432" />
+        <di:waypoint x="2310" y="770" />
+        <di:waypoint x="1960" y="770" />
+        <di:waypoint x="1960" y="790" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2323" y="450" width="74" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xlf8gm_di" bpmnElement="AufgabePerEMailMessageFlow">
+        <di:waypoint x="1520" y="630" />
+        <di:waypoint x="1520" y="218" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1433" y="463" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a85l5g_di" bpmnElement="PrufergebnisKommentarMessageFlow" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <di:waypoint x="1930" y="410" />
+        <di:waypoint x="1930" y="520" />
+        <di:waypoint x="1560" y="520" />
+        <di:waypoint x="1560" y="630" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1943" y="456" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06qbnb2_di" bpmnElement="RechnungAlsPDFMessageFlow">
+        <di:waypoint x="1540" y="630" />
+        <di:waypoint x="1540" y="450" />
+        <di:waypoint x="1610" y="450" />
+        <di:waypoint x="1610" y="410" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1556" y="456" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0v9m5pp_di" bpmnElement="AufgabePerEMailMessageFlow1">
+        <di:waypoint x="1020" y="1150" />
+        <di:waypoint x="1020" y="1200" />
+        <di:waypoint x="370" y="1200" />
+        <di:waypoint x="370" y="1418" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="383" y="1213" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nbsz7t_di" bpmnElement="RechnungAlsPDFMessageFlow1">
+        <di:waypoint x="1040" y="1150" />
+        <di:waypoint x="1040" y="1210" />
+        <di:waypoint x="500" y="1210" />
+        <di:waypoint x="500" y="1270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="526" y="1216" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wn8r8k_di" bpmnElement="PrufergebnisKommentarMessageFlow1" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <di:waypoint x="1570" y="1270" />
+        <di:waypoint x="1570" y="1210" />
+        <di:waypoint x="1060" y="1210" />
+        <di:waypoint x="1060" y="1150" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1473" y="1216" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13321is_di" bpmnElement="MailMitAblehnungsgrundMessageFlow">
+        <di:waypoint x="1710" y="1010" />
+        <di:waypoint x="1710" y="1210" />
+        <di:waypoint x="1890" y="1210" />
+        <di:waypoint x="1890" y="1418" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1707" y="1216" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0z1240f_di" bpmnElement="MailMitFreigabebestatigungMessageFlow">
+        <di:waypoint x="2100" y="870" />
+        <di:waypoint x="2100" y="1210" />
+        <di:waypoint x="1960" y="1210" />
+        <di:waypoint x="1960" y="1532" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1991" y="1216" width="89" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0asm3g0_di" bpmnElement="RechnungUndBegleitbriefMitBegrundungMessageFlow">
+        <di:waypoint x="1720" y="1640" />
+        <di:waypoint x="1720" y="1740" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1633" y="1680" width="74" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kzwlir_di" bpmnElement="ZahlungMessageFlow">
+        <di:waypoint x="2100" y="1590" />
+        <di:waypoint x="2100" y="1740" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2110" y="1693" width="39" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
