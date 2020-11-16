@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0irg7ww" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.3.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0irg7ww" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.4.0">
   <bpmn:collaboration id="Collaboration_06vozgy">
     <bpmn:participant id="SekretariatParticipant" name="Sekretariat" processRef="Process_0npywkb" />
     <bpmn:participant id="ProzessportalParticipant" name="Prozessportal" processRef="Kreditorprozess" />
@@ -96,13 +96,13 @@
         <bpmn:flowNodeRef>RechnungFormalAbgelehntEndEvent</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>MateriellesPrufergebnisGateway</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1jw4fx0</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_0qrzd9n</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>RechnungZurZahlungFreigegebenEndEvent</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>RechnungMateriellAbgelehntEndEvent</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1k5dzl4</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>RechnungAutomatischFormellPrufenTask</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>DatenVonZugehorigerBestellungAuslesenTask</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>RechnungInERPZurBezahlungErfassenTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1k5dzl4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0qrzd9n</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="KreditorenbuchhaltungLane" name="Kreditorenbuchhaltung">
         <bpmn:flowNodeRef>Gateway_10ld1xx</bpmn:flowNodeRef>
@@ -213,11 +213,6 @@ PDF per FileUpload (invoiceFile)</bpmn:documentation>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1cneye0" sourceRef="Gateway_10ld1xx" targetRef="RechnungFormellPrufenTask" />
     <bpmn:sequenceFlow id="Flow_1swl9v6" sourceRef="RechnungInERPZurBezahlungErfassenTask" targetRef="Activity_0qrzd9n" />
-    <bpmn:task id="Activity_0qrzd9n" name="Freigabe-bestätigung senden">
-      <bpmn:documentation>Wird umgesetzt mit einem per External Task Pattern eingebundenen Benachrichtungsservice. Hier wird die Kreditorenbuchhaltung per E-Mail benachrichtigt.</bpmn:documentation>
-      <bpmn:incoming>Flow_1swl9v6</bpmn:incoming>
-      <bpmn:outgoing>Flow_0hm1zxz</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="Flow_0hm1zxz" sourceRef="Activity_0qrzd9n" targetRef="RechnungZurZahlungFreigegebenEndEvent" />
     <bpmn:endEvent id="RechnungZurZahlungFreigegebenEndEvent" name="Rechnung zur Zahlung freigegeben">
       <bpmn:incoming>Flow_0hm1zxz</bpmn:incoming>
@@ -226,11 +221,6 @@ PDF per FileUpload (invoiceFile)</bpmn:documentation>
     <bpmn:endEvent id="RechnungMateriellAbgelehntEndEvent" name="Rechnung materiell abgelehnt">
       <bpmn:incoming>Flow_0eafodb</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:task id="Activity_1k5dzl4" name="Ablehnungs-entscheid miteilen">
-      <bpmn:documentation>Wird umgesetzt mit einem per External Task Pattern eingebundenen Benachrichtungsservice. Hier wird die Kreditorenbuchhaltung per E-Mail benachrichtigt.</bpmn:documentation>
-      <bpmn:incoming>NegativSequenceFlow2</bpmn:incoming>
-      <bpmn:outgoing>Flow_0eafodb</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:userTask id="RechnungFormellPrufenTask" name="Rechnung formell prüfen" camunda:asyncAfter="true" camunda:candidateGroups="kreditorenbuchhaltung">
       <bpmn:documentation>Mitarbeiter wird händisch im ERP nach einer passenden Bestellung suchen. Falls er keine findet, wird er z.B. versuchen, intern herauszufinden, wer der Auslöser dieser Rechnung ist. Falls auch dies nicht gelingt oder andere formale Fehler in der Rechnung sind (z.B. falsche MwSt.), wird er die Rechnung ablehnen.
 
@@ -299,6 +289,16 @@ Lieferantendaten:
 3. Als Antwort erhalten wir eine Erfolgsbestätigung oder Fehlermeldung. Den zweiten Fall ignorieren wir -&gt; Exception werfen.</bpmn:documentation>
       <bpmn:incoming>Flow_1yye4ye</bpmn:incoming>
       <bpmn:outgoing>Flow_1swl9v6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1k5dzl4" name="Ablehnungs-entscheid miteilen" camunda:type="external" camunda:topic="SendMail">
+      <bpmn:documentation>Wird umgesetzt mit einem per External Task Pattern eingebundenen Benachrichtungsservice. Hier wird die Kreditorenbuchhaltung per E-Mail benachrichtigt.</bpmn:documentation>
+      <bpmn:incoming>NegativSequenceFlow2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0eafodb</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_0qrzd9n" name="Freigabe-bestätigung senden" camunda:type="external" camunda:topic="SendMail">
+      <bpmn:documentation>Wird umgesetzt mit einem per External Task Pattern eingebundenen Benachrichtungsservice. Hier wird die Kreditorenbuchhaltung per E-Mail benachrichtigt.</bpmn:documentation>
+      <bpmn:incoming>Flow_1swl9v6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hm1zxz</bpmn:outgoing>
     </bpmn:serviceTask>
   </bpmn:process>
   <bpmn:process id="Process_161542n" isExecutable="false">
@@ -752,9 +752,6 @@ Lieferantendaten:
       <bpmndi:BPMNShape id="Gateway_10ld1xx_di" bpmnElement="Gateway_10ld1xx" isMarkerVisible="true">
         <dc:Bounds x="885" y="1085" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0qrzd9n_di" bpmnElement="Activity_0qrzd9n">
-        <dc:Bounds x="2050" y="790" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1am22tg_di" bpmnElement="RechnungZurZahlungFreigegebenEndEvent">
         <dc:Bounds x="2202" y="812" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -766,9 +763,6 @@ Lieferantendaten:
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1794" y="910" width="51" height="40" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1k5dzl4_di" bpmnElement="Activity_1k5dzl4">
-        <dc:Bounds x="1660" y="930" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0hfk4mn_di" bpmnElement="RechnungFormellPrufenTask">
         <dc:Bounds x="990" y="1070" width="100" height="80" />
@@ -784,6 +778,12 @@ Lieferantendaten:
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1ip4lox_di" bpmnElement="RechnungInERPZurBezahlungErfassenTask">
         <dc:Bounds x="1890" y="790" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18naag2_di" bpmnElement="Activity_1k5dzl4">
+        <dc:Bounds x="1660" y="930" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_08jwxzb_di" bpmnElement="Activity_0qrzd9n">
+        <dc:Bounds x="2050" y="790" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Participant_0guif6x_di" bpmnElement="ERPParticipant" isHorizontal="true">
         <dc:Bounds x="280" y="372" width="300" height="60" />
